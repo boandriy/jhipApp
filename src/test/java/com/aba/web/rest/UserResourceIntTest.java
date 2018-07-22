@@ -5,6 +5,7 @@ import com.aba.domain.Authority;
 import com.aba.domain.User;
 import com.aba.repository.UserRepository;
 import com.aba.security.AuthoritiesConstants;
+import com.aba.service.FileStorageService;
 import com.aba.service.MailService;
 import com.aba.service.UserService;
 import com.aba.service.dto.UserDTO;
@@ -75,6 +76,9 @@ public class UserResourceIntTest {
     private MailService mailService;
 
     @Autowired
+    private FileStorageService fileStorageService;
+
+    @Autowired
     private UserService userService;
 
     @Autowired
@@ -99,7 +103,8 @@ public class UserResourceIntTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        UserResource userResource = new UserResource(userService, userRepository, mailService);
+        UserResource userResource = new UserResource(userService, userRepository, mailService,
+            fileStorageService);
         this.restUserMockMvc = MockMvcBuilders.standaloneSetup(userResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
             .setControllerAdvice(exceptionTranslator)

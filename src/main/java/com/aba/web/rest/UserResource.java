@@ -1,6 +1,8 @@
 package com.aba.web.rest;
 
 import com.aba.config.Constants;
+import com.aba.service.FileStorageService;
+import com.aba.service.dto.UploadFileResponse;
 import com.codahale.metrics.annotation.Timed;
 import com.aba.domain.User;
 import com.aba.repository.UserRepository;
@@ -24,6 +26,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.validation.Valid;
 import java.net.URI;
@@ -66,11 +70,15 @@ public class UserResource {
 
     private final MailService mailService;
 
-    public UserResource(UserService userService, UserRepository userRepository, MailService mailService) {
+    private FileStorageService fileStorageService;
+
+    public UserResource(UserService userService, UserRepository userRepository, MailService mailService,
+                        FileStorageService fileStorageService) {
 
         this.userService = userService;
         this.userRepository = userRepository;
         this.mailService = mailService;
+        this.fileStorageService = fileStorageService;
     }
 
     /**
@@ -187,5 +195,18 @@ public class UserResource {
         log.debug("REST request to delete User: {}", login);
         userService.deleteUser(login);
         return ResponseEntity.ok().headers(HeaderUtil.createAlert( "A user is deleted with identifier " + login, login)).build();
+    }
+
+    @PostMapping("/users/uploadFile")
+    public UploadFileResponse uploadFile(@RequestParam("file") MultipartFile file) {
+        String fileName = fileStorageService.storeFile(file);
+
+        String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+            .path("/downloadFile/")
+            .path(fileName)
+            .toUriString();
+
+        return new UploadFileResponse(fileName, fileDownloadUri,
+            file.getContentType(), file.getSize());
     }
 }
