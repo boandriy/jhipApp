@@ -202,9 +202,12 @@ public class UserResource {
         String fileName = fileStorageService.storeFile(file);
 
         String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-            .path("/downloadFile/")
+            .path("/api/downloadFile/")
             .path(fileName)
             .toUriString();
+
+        //TODO update user profile with photo id,
+        // you will need to add user id paramether here as well
 
         return new UploadFileResponse(fileName, fileDownloadUri,
             file.getContentType(), file.getSize());
